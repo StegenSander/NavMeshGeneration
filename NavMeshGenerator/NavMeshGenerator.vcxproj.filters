@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="FrameworkFiles">
+      <UniqueIdentifier>{bb32ba49-8de2-442f-b824-89798d264f4c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameFiles">
+      <UniqueIdentifier>{88578aa1-ff89-4638-bd2f-51dacdea2e8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameFiles\AStar">
+      <UniqueIdentifier>{59cc8791-2c61-4ca5-accb-27f5aec33261}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameFiles\Graph">
+      <UniqueIdentifier>{acc5f4b9-dc65-4cbc-a3a1-5573eb45360c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameFiles\NavMesh">
+      <UniqueIdentifier>{64e8e67d-587b-4e0e-b222-b86f9d3f63b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Vector2f.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Core.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="structs.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>GameFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>GameFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="AStar.cpp">
+      <Filter>GameFiles\AStar</Filter>
+    </ClCompile>
+    <ClCompile Include="Graph.cpp">
+      <Filter>GameFiles\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Connection.cpp">
+      <Filter>GameFiles\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Node.cpp">
+      <Filter>GameFiles\Graph</Filter>
+    </ClCompile>
+    <ClCompile Include="Obstacle.cpp">
+      <Filter>GameFiles\NavMesh</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>FrameworkFiles</Filter>
+    </ClCompile>
+    <ClCompile Include="NavigationMesh.cpp">
+      <Filter>GameFiles\NavMesh</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Core.h">
+      <Filter>FrameworkFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>FrameworkFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="structs.h">
+      <Filter>FrameworkFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>FrameworkFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Vector2f.h">
+      <Filter>FrameworkFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>GameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>GameFiles</Filter>
+    </ClInclude>
+    <ClInclude Include="AStar.h">
+      <Filter>GameFiles\AStar</Filter>
+    </ClInclude>
+    <ClInclude Include="Heuristics.h">
+      <Filter>GameFiles\AStar</Filter>
+    </ClInclude>
+    <ClInclude Include="Graph.h">
+      <Filter>GameFiles\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Connection.h">
+      <Filter>GameFiles\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Node.h">
+      <Filter>GameFiles\Graph</Filter>
+    </ClInclude>
+    <ClInclude Include="Obstacle.h">
+      <Filter>GameFiles\NavMesh</Filter>
+    </ClInclude>
+    <ClInclude Include="NavigationMesh.h">
+      <Filter>GameFiles\NavMesh</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
