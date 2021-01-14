@@ -1,4 +1,5 @@
 # NavMeshGenerator
+Navigation mesh generation using the ear clipping algorithm</br>
 Made by Stegen Sander
 
 ## Introduction
