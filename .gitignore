@@ -19,7 +19,13 @@
 [Rr]elease/
 [Rr]eleases/
 x64/
+!Libraries/*/lib/x64
+!Libraries/*/lib/x64/*.dll
+!Libraries/*/lib/x64/*.lib
 x86/
+!Libraries/*/lib/x86
+!Libraries/*/lib/x86/*.dll
+!Libraries/*/lib/x86/*.lib
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
