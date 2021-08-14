@@ -98,7 +98,7 @@ void Graph::RemoveNode(Node* pNode)
 		});
 }
 
-void Graph::SetColorOFAllNode(const Color4f& color)
+void Graph::SetColorOfAllNode(const Color4f& color)
 {
 	for (Node* pNode : m_Nodes)
 	{

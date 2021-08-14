@@ -4,7 +4,7 @@ class Camera
 {
 public:
 	Camera(Point2f pos);
-	~Camera();
+	virtual ~Camera();
 
 	void ResetCameraPos();
 	void MoveCamera(Vector2f amount,bool mustMultiplySpeed);

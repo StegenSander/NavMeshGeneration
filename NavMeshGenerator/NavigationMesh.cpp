@@ -6,14 +6,12 @@
 
 NavigationMesh::NavigationMesh(const Rectf& boundaries)
 	:m_Boundaries(boundaries)
-	,m_NavMesh(new Graph())
 {
-
+	m_NavMesh = std::make_shared<Graph>();
 }
 
 NavigationMesh::~NavigationMesh()
 {
-	if (m_NavMesh) delete m_NavMesh;
 }
 
 void NavigationMesh::CleanUpNavMesh()
@@ -21,8 +19,7 @@ void NavigationMesh::CleanUpNavMesh()
 	m_Vertices.clear();
 	m_pNodes.clear();
 	m_Triangles.clear();
-	if (m_NavMesh) delete m_NavMesh;
-	m_NavMesh = new Graph();
+	m_NavMesh = std::make_shared<Graph>();
 }
 
 void NavigationMesh::SetObstacles(const std::vector<Obstacle*> obstacles)
@@ -55,8 +52,6 @@ void NavigationMesh::CalculateNavMesh()
 
 	InitializeVertices(); //Push the boundaries as vertices
 
-	//Inset
-
 	SortObstacles(); //Sort obstacles based on there x value
 	HandleInvalidObstacles(); //Remove obstacles that will cause a crash
 
@@ -70,10 +65,6 @@ void NavigationMesh::CalculateNavMesh()
 	CreateNodesAndGraph();
 
 	StartEarClipping();
-
-
-
-
 }
 
 void NavigationMesh::InitializeVertices()
@@ -86,8 +77,6 @@ void NavigationMesh::InitializeVertices()
 
 std::vector<Point2f> NavigationMesh::InsetVertices(const std::vector<Point2f>& vertices)
 {
-	if (!m_MustInsertVertices) return vertices;
-
 	//Make a copy, since the original may be altered
 	std::vector<Point2f> insettedVertices{};
 	std::copy(vertices.cbegin(), vertices.cend(),std::back_inserter(insettedVertices));
@@ -95,71 +84,56 @@ std::vector<Point2f> NavigationMesh::InsetVertices(const std::vector<Point2f>& v
 	int indexAdder{};
 	for (int i = 0; i < vertices.size(); i++)
 	{
-		//Get the Necesarry Indices
+		//Get the Necessary Indices
 		int prevIndex{ i - 1 };
 		if (prevIndex < 0) prevIndex += vertices.size();
 		int nextIndex{ (i + 1) % int(vertices.size()) };
 
-		//Get The necesarry Vectors/Normals
-		Vector2f prevVector = Vector2f{ vertices[prevIndex],vertices[i] }.Normalized();
-		Vector2f prevNormal = prevVector.Orthogonal().Normalized();
+		//Get The necessary Vectors/Normals
+		const Vector2f prevVector = Vector2f{ vertices[prevIndex],vertices[i] }.Normalized();
+		const Vector2f prevNormal = prevVector.Orthogonal().Normalized();
 
-		Vector2f nextVector = Vector2f{ vertices[i],vertices[nextIndex] }.Normalized();
-		Vector2f nextNormal = nextVector.Orthogonal().Normalized();
+		const Vector2f nextVector = Vector2f{ vertices[i],vertices[nextIndex] }.Normalized();
+		const Vector2f nextNormal = nextVector.Orthogonal().Normalized();
 
 
+		//Get the cross and dot product of the OUTER angle
+		const float cross = prevVector.CrossProduct(nextVector);
+		const float dot = prevVector.DotProduct(nextVector);
+
+
+		//max To One Total Normal, we don't want to inset to far if 2 normals point roughly in the same direction
 		Vector2f totalNormal{ };
-		float cross = prevVector.CrossProduct(nextVector);
-		float dot = prevVector.DotProduct(nextVector);
-
-
-		//max To One Total Normal
 		totalNormal = nextNormal + prevNormal;
 		if (abs(totalNormal.x) > 1.f) totalNormal.x = utils::sign(totalNormal.x) * 1.f;
 		if (abs(totalNormal.y) > 1.f) totalNormal.y = utils::sign(totalNormal.y) * 1.f;
 
+		
+		//Handle 2 Different Cases when Insetting
 
-		//Handle 3 Different Cases when Insetting
-		if (cross >= 0)
+		//case 1: The OUTER angle is between 0 and 270DEG
+		if (cross >= 0 /*angle smaller than 180Deg*/ 
+			|| dot > 0.f /*angle between 180 and 270 (if cross <0)*/)
 		{
-			//Case1: Cross > 0 --> Angle < 180Deg
 			insettedVertices[i + indexAdder] = vertices[i] + m_AgentRadius * totalNormal;
 		}
-		else
-		{
-			//Case2: cross < 0 --> Angle >180 Deg
+		else //case 2: angle is bigger than 270Deg (Very sharp inner angle)
+		{	
+			//Calculate the 2 theoretical point to cover the angle
+			Point2f point1 = vertices[i] + m_AgentRadius * prevVector + m_AgentRadius * prevNormal;
+			Point2f point2 = vertices[i] + m_AgentRadius * (-nextVector) + m_AgentRadius * nextNormal;
 
-			if (abs(dot) < 0.0001f) //dot == 0 means right angle easy to handle
+			//If these point are far enough from eachother draw them both
+			if (Vector2f{ point2 - point1 }.SquaredLength() > m_AgentRadius * m_AgentRadius)
 			{
-				insettedVertices[i + indexAdder] = vertices[i] + m_AgentRadius * totalNormal;
+				insettedVertices[i + indexAdder] = point1;
+				insettedVertices.insert(insettedVertices.begin() + i + indexAdder + 1, point2);
+				indexAdder++;
 			}
-			else //Sharp angles can return in very stretched navmeshes, we prevent this by adding and extra vertex
+			//otherwise just use the average of these 2 points
+			else
 			{
-				if (dot < 0.f)
-				{
-				//Recalculate the distance to the obstacle
-				//Adjust the original point along the sides
-				//Add an extra point 
-				//float radius = sqrt(2 * pow(m_AgentRadius, 2)); 
-					Point2f point1 = vertices[i] + m_AgentRadius * prevVector + m_AgentRadius * prevNormal;
-					Point2f point2 = vertices[i] + m_AgentRadius * (-nextVector) + m_AgentRadius * nextNormal;
-
-					if (Vector2f{ point2 - point1 }.SquaredLength() > pow(m_AgentRadius, 2.f))
-					{
-						insettedVertices[i + indexAdder] = point1;
-						insettedVertices.insert(insettedVertices.begin() + i + indexAdder + 1, point2);
-						indexAdder++;
-					}
-					else
-					{
-						insettedVertices[i + indexAdder] = Point2f{ (point1.x + point2.x) / 2, (point1.y + point2.y) / 2 };
-					}
-				}
-				else
-				{
-					insettedVertices[i + indexAdder] = vertices[i] + m_AgentRadius * totalNormal;
-				}
-				
+				insettedVertices[i + indexAdder] = Point2f{ (point1.x + point2.x) / 2, (point1.y + point2.y) / 2 };
 			}
 		}
 	}
@@ -195,7 +169,7 @@ void NavigationMesh::HandleInvalidObstacles()
 
 	for (Obstacle* pObstacle : m_Obstacles)
 	{
-
+		//Obstacle needs at least 3 points
 		const std::vector<Point2f>& obstaclePoints = pObstacle->GetInsettedPoints();
 		if (obstaclePoints.size() < 3)
 		{
@@ -204,8 +178,10 @@ void NavigationMesh::HandleInvalidObstacles()
 			goto nextObstacle;
 		}
 
+		
 		for (const Point2f& point : obstaclePoints)
 		{
+			//Obstacle needs to be inside the level boundaries
 			if (!utils::IsPointInRect(point, m_Boundaries))
 			{
 				invalidObstacle.push_back(pObstacle);
@@ -213,6 +189,7 @@ void NavigationMesh::HandleInvalidObstacles()
 				goto nextObstacle;
 			}
 
+			//Obstacles should not overlap
 			for (Obstacle* pObstacle2 : m_Obstacles)
 			{
 				if (pObstacle != pObstacle2)
@@ -244,7 +221,9 @@ nextObstacle:;
 
 void NavigationMesh::InsertObstacleVertices(Obstacle* pObstacle)
 {
-	std::vector<Point2f> obstacleVertices = pObstacle->GetInsettedPoints();
+	std::vector<Point2f> obstacleVertices;
+	if (m_MustInsetVertices)obstacleVertices = pObstacle->GetInsettedPoints();
+	else obstacleVertices = pObstacle->GetPoints();
 
 	//Find the most right point
 	auto mostRightPointIt = std::max_element(obstacleVertices.begin(), obstacleVertices.end(), [](const Point2f& lhs, const Point2f& rhs)
@@ -316,7 +295,7 @@ void NavigationMesh::InsertObstacleVertices(Obstacle* pObstacle)
 	else connectToIt = *nodeItIt;
 
 	//Connect the obstacle
-		//Shift the element to the right point is first
+	//Shift the element so the right vertex is first in the list
 	std::rotate(obstacleVertices.begin(), mostRightPointIt, obstacleVertices.end());
 
 	//We push duplicate to complete the connection
@@ -342,6 +321,7 @@ void NavigationMesh::CreateNodesAndGraph()
 			currentNode = new Node(vertex, Color4f{ 0.f,0.f,1.f,1.f });
 			m_NavMesh->AddNode(currentNode);
 		}
+
 		m_pNodes.push_back(currentNode);
 
 		if (previousNode)m_NavMesh->AddConnection(previousNode, currentNode);
@@ -361,11 +341,12 @@ void NavigationMesh::StartEarClipping()
 		std::cout << "New loop, Remaining points: " << m_Vertices.size() << "\n";
 		for (int i = 0; i < m_Vertices.size(); i++)
 		{
-			//Calculate the indices
+			//validate the indices we want to use
 			int prevIndex{ i - 1 };
 			if (prevIndex < 0) prevIndex += m_Vertices.size();
 			int nextIndex{ (i + 1) % int(m_Vertices.size()) };
 
+			//Check if we can clip this ear
 			if (CanClipEar(prevIndex, i, nextIndex))
 			{
 				m_NavMesh->AddConnection(m_pNodes[prevIndex], m_pNodes[nextIndex]);
@@ -390,12 +371,12 @@ void NavigationMesh::StartEarClipping()
 bool NavigationMesh::CanClipEar(int prevIndex, int targetIndex, int nextIndex)
 {
 	//These 3 indices represent a triangle
-	std::vector<Point2f> triangle{ m_Vertices[prevIndex],m_Vertices[targetIndex],m_Vertices[nextIndex]};
-	Vector2f vector1{ triangle[0], triangle[1] };
-	Vector2f vector2{ triangle[1], triangle[2] };
+	const std::vector<Point2f> triangle{ m_Vertices[prevIndex],m_Vertices[targetIndex],m_Vertices[nextIndex]};
+	const Vector2f vector1{ triangle[0], triangle[1] };
+	const Vector2f vector2{ triangle[1], triangle[2] };
 
 	//Cant clip a triangle if the angle > 180 (This crossproduct < 0)
-	float cross = vector1.CrossProduct(vector2);
+	const float cross = vector1.CrossProduct(vector2);
 	if (cross < 0.f)
 	{
 		std::cout << "Could not clip, bad cross\n";

@@ -14,7 +14,15 @@ class Graph
 {
 public:
 	Graph();
-	~Graph();
+	virtual ~Graph();
+
+
+	//------COPY CONSTRUCTORS------
+	Graph(const Graph&) = delete;
+	Graph(Graph&&) = delete;
+	//------ASSIGNMENT OPERATORS------
+	Graph operator=(const Graph&) = delete;
+	Graph& operator=(Graph&&) = delete;
 
 	void Draw(bool drawNode, bool drawConnections) const;
 
@@ -27,7 +35,7 @@ public:
 	Node* GetNodeInRange(const Point2f& pos, float maxDistance = 15.f);
 	void RemoveNode(Node* pNode);
 
-	void SetColorOFAllNode(const Color4f& color);
+	void SetColorOfAllNode(const Color4f& color);
 
 	std::vector<Connection*> GetConnectionsOfNode(Node* pNode) const;
 
